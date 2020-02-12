@@ -2,6 +2,6 @@
     "name": "OriginalSoundTrack",
     "description": "A mod that allows you to play Risk of Rain 1 (or any) music in place of the normal soundtrack.",
     "website_url": "https://github.com/kylepaulsen/RoR2-Original-Sound-Track",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "dependencies": []
 }
