@@ -14,7 +14,7 @@ Make sure the filenames match what's in settings.xml (or edit settings.xml to ma
 
 ## settings.xml
 
-If your files match all the song "names", then you dont need to do anything else, but feel free to customize.
+If your files match all the song "names", then you don't need to do anything else, but feel free to customize.
 
 If the plugin fails to match a song for a scene, it will just choose a random one it found in the plugin directory.
 
@@ -85,7 +85,7 @@ This plugin uses NAudio.dll https://github.com/naudio/NAudio to help load and pl
 This is done to make it very easy for players to supply their own music. The downside is that the normal in game
 music isn't disabled (Maybe there is a way to do that, I dunno). To get around this, this plugin sets your in game
 music volume setting to 0. It tries to set it back to where it was when the game closes but I'm not sure if this works.
-Anmyway you have been warned.
+Anyway you have been warned.
 
 ## Licence
 
