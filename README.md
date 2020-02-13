@@ -43,6 +43,9 @@ The top level `<volume>` tag is the master volume for all this plugin's music. A
 
 The top level `<loop>` tag determines if music should loop or pick another song (from matching songs) after a song ends.
 
+The top level `<muisic-path>` tag specifies where the plugin should scan for music. It does not traverse down directories.
+The default path it scans for music is: `Risk of Rain 2\BepInEx\plugins\OriginalSoundTrack`
+
 ## Scene IDs (level IDs).
 
 (As of the hidden realms update)

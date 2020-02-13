@@ -2,8 +2,14 @@
 <settings>
     <!-- Master volume for all music. Decimal between 0 and 1 -->
     <volume>0.5</volume>
+
     <!-- Should music loop? If not true, then another song is selected from scene matches -->
     <loop>true</loop>
+
+    <!-- To have this plugin scan a different directory for music files,
+        Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
+
+    <!-- <music-path>C:\Users\YourName\Music\SomeMusicFolder</music-path> -->
 
     <!--
         Here is where you define what songs are used in which scenes and if they are

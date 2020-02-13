@@ -26,7 +26,7 @@ namespace OriginalSoundTrack {
     //This attribute is required, and lists metadata for your plugin.
     //The GUID should be a unique ID for this plugin, which is human readable (as it is used in places like the config). I like to use the java package notation, which is "com.[your name here].[your plugin name here]"
     //The name is the name of the plugin that's displayed on load, and the version number just specifies what version the plugin is.
-    [BepInPlugin("com.kylepaulsen.originalsoundtrack", "OriginalSoundTrack", "1.0")]
+    [BepInPlugin("com.kylepaulsen.originalsoundtrack", "OriginalSoundTrack", "1.1.0")]
 
     //This is the main declaration of our plugin class. BepInEx searches for all classes inheriting from BaseUnityPlugin to initialize on startup.
     //BaseUnityPlugin itself inherits from MonoBehaviour, so you can use this as a reference for what you can declare and use in your plugin class: https://docs.unity3d.com/ScriptReference/MonoBehaviour.html
@@ -52,10 +52,7 @@ namespace OriginalSoundTrack {
         //The Awake() method is run at the very start when the game is initialized.
         public void Awake() {
             var pluginPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var info = new DirectoryInfo(pluginPath);
-            soundFiles = info.GetFiles()
-                .Where(f => System.IO.Path.GetExtension(f.Name) == ".mp3" || System.IO.Path.GetExtension(f.Name) == ".wav")
-                .ToArray();
+            var musicPath = pluginPath;
 
             try {
                 var settingsXml = new XmlDocument();
@@ -64,6 +61,11 @@ namespace OriginalSoundTrack {
 
                 globalMusicVolume = float.Parse(settings["volume"].InnerText);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
+
+                if (settings["music-path"] != null) {
+                    musicPath = settings["music-path"].InnerText;
+                }
+                soundFiles = SearchForAudioFiles(musicPath);
 
                 foreach (XmlNode node in settings["music"].ChildNodes) {
                     if (node.NodeType != XmlNodeType.Comment) {
@@ -88,9 +90,20 @@ namespace OriginalSoundTrack {
                     }
                 }
             } catch (Exception ex) {
-                Debug.Log("!!!!! OriginalSoundTrack Mod: Failed to parse settings.xml !!!!!");
+                Debug.LogWarning("!!!!! OriginalSoundTrack Mod: Failed to parse settings.xml !!!!!");
                 Debug.Log("OriginalSoundTrack Mod: Music will be randomly selected from what is found in the plugin dir.");
                 Debug.Log(ex);
+            }
+
+            if (soundFiles == null) {
+                musicPath = pluginPath;
+                soundFiles = SearchForAudioFiles(musicPath);
+            }
+
+            if (soundFiles.Length == 0) {
+                Debug.LogError("!!!!! OriginalSoundTrack Mod: No audio files found. Exiting. !!!!!");
+                Debug.LogError("OriginalSoundTrack Mod: Looked for .mp3 and .wav files in: " + musicPath);
+                return;
             }
 
             if (outputDevice == null) {
@@ -132,6 +145,17 @@ namespace OriginalSoundTrack {
 
                 PickOutMusic();
             };
+        }
+
+        private FileInfo[] SearchForAudioFiles(string path) {
+            var info = new DirectoryInfo(path);
+            if (info.Exists) {
+                return info.GetFiles()
+                    .Where(f => System.IO.Path.GetExtension(f.Name) == ".mp3" || System.IO.Path.GetExtension(f.Name) == ".wav")
+                    .ToArray();
+            }
+            FileInfo[] files = {};
+            return files;
         }
 
         private string GetAttribute(XmlNode node, string attribute) {
