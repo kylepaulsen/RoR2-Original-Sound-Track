@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Reflection;
+using System.Globalization;
 
 namespace OriginalSoundTrack {
     // The OriginalSoundTrack plugin - For replacing the in game music with Risk of Rain 1 music (or your own).
@@ -39,7 +40,6 @@ namespace OriginalSoundTrack {
         private List<Music> musics = new List<Music>(); // list of main music objects.
         private AudioFileReader currentSong;
         private string currentSongFullName = ""; // helpful for not restarting a song when it's already playing.
-        private DateTime lastPlayTime; // helps prevent multiple calls to PlayMusic in a row.
         private bool startedTeleporterEvent = false; // tracks the first interaction with the tele.
         private bool songPaused = false; // for pausing the music when the player pauses.
         private float globalMusicVolume = 0.5f; // default global music volume.
@@ -59,7 +59,7 @@ namespace OriginalSoundTrack {
                 settingsXml.Load(pluginPath + "/settings.xml");
                 settings = settingsXml["settings"];
 
-                globalMusicVolume = float.Parse(settings["volume"].InnerText);
+                globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
 
                 if (settings["music-path"] != null) {
@@ -76,7 +76,7 @@ namespace OriginalSoundTrack {
                         newMusic.volume = 1f;
                         var vol = GetAttribute(node, "volume");
                         if (vol != "") {
-                            newMusic.volume = float.Parse(vol);
+                            newMusic.volume = float.Parse(vol, CultureInfo.InvariantCulture);
                         }
 
                         foreach (var soundFile in soundFiles) {
@@ -135,15 +135,16 @@ namespace OriginalSoundTrack {
             };
 
             SceneManager.sceneLoaded += (scene, mode) => {
-                currentScene = scene.name;
                 #if DEBUG
                     Debug.Log("====================== CHANGE SCENE ========================");
-                    Debug.Log(currentScene);
+                    Debug.Log(scene.name);
                 #endif
 
-                startedTeleporterEvent = false;
-
-                PickOutMusic();
+                if (currentScene != scene.name) {
+                    currentScene = scene.name;
+                    startedTeleporterEvent = false;
+                    PickOutMusic();
+                }
             };
         }
 
@@ -224,29 +225,22 @@ namespace OriginalSoundTrack {
 
         private IEnumerator<WaitForSeconds> PlayMusic(string file, float volume = 1f) {
             if (file != currentSongFullName) {
-                if (lastPlayTime == null || (DateTime.UtcNow - lastPlayTime).TotalSeconds > 5) {
-                    lastPlayTime = DateTime.UtcNow;
-                    if (outputDevice.PlaybackState == PlaybackState.Playing) {
-                        fader.BeginFadeOut(1500);
-                        yield return new WaitForSeconds(1.5f);
-                        outputDevice.Stop();
-                        currentSong = null;
-                    }
-                    currentSongFullName = file;
-                    currentSong = new AudioFileReader(file);
-                    currentSong.Volume = volume * globalMusicVolume;
-                    fader = new FadeInOutSampleProvider(currentSong);
-                    outputDevice.Init(fader);
-                    #if DEBUG
-                        Debug.Log("====== Now Playing: " + file);
-                    #endif
-                    outputDevice.Play();
-                    songPaused = false;
-                } else {
-                    #if DEBUG
-                        Debug.Log("PlayMusic: Tried to play another song too soon!!! " + file);
-                    #endif
+                currentSongFullName = file;
+                if (outputDevice.PlaybackState == PlaybackState.Playing) {
+                    fader.BeginFadeOut(1500);
+                    yield return new WaitForSeconds(1.5f);
+                    outputDevice.Stop();
+                    currentSong = null;
                 }
+                currentSong = new AudioFileReader(file);
+                currentSong.Volume = volume * globalMusicVolume;
+                fader = new FadeInOutSampleProvider(currentSong);
+                outputDevice.Init(fader);
+                #if DEBUG
+                    Debug.Log("====== Now Playing: " + file);
+                #endif
+                outputDevice.Play();
+                songPaused = false;
             } else {
                 #if DEBUG
                     Debug.Log("PlayMusic: Already playing: " + file);
