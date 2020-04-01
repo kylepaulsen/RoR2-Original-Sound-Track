@@ -80,7 +80,9 @@ frozenwall     -   Rallypoint Delta
 wispgraveyard  -   Scorched Acres
 dampcavesimple -   Abyssal Depths
 shipgraveyard  -   Siren's Call
+skymeadow      -   Sky Meadow
 
+artifactworld  -   Bulwark's Ambry (Artifact Challenge arena where you unlock the artifacts with keys.)
 arena          -   Void Fields (poison area with lots of "teleport" events.)
 mysteryspace   -   A Moment, Fractured (the place where you can obliterate yourself.)
 limbo          -   A Moment, Whole (the mega scavenger boss)

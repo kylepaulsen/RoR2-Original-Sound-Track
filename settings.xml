@@ -90,7 +90,7 @@
         />
         <song
             name="07 Hailstorm.mp3"
-            scenes="frozenwall,wispgraveyard,dampcavesimple"
+            scenes="frozenwall,wispgraveyard,dampcavesimple,shipgraveyard"
             boss="true"
             volume="1"
         />
@@ -132,13 +132,13 @@
         />
         <song
             name="14 Precipitation.mp3"
-            scenes="dampcavesimple,shipgraveyard"
+            scenes="skymeadow"
             boss="true"
             volume="1"
         />
         <song
             name="15 Double Fucking Rainbow.mp3"
-            scenes="goldshores"
+            scenes="goldshores,artifactworld"
             boss="false"
             volume="1"
         />
@@ -150,7 +150,7 @@
         />
         <song
             name="16 Coalescence.mp3"
-            scenes="dampcavesimple,shipgraveyard,arena"
+            scenes="skymeadow,arena"
             boss="false"
             volume="1"
         />
