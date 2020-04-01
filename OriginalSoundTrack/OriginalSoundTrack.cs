@@ -118,6 +118,14 @@ namespace OriginalSoundTrack {
                 }
             };
 
+            On.RoR2.TeleporterInteraction.RpcClientOnActivated += (orig, self, activator) => {
+                orig(self, activator);
+                if (!startedTeleporterEvent) {
+                    startedTeleporterEvent = true;
+                    PickOutMusic(true);
+                }
+            };
+
             On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) => {
                 orig(self);
                 if (outputDevice != null && outputDevice.PlaybackState == PlaybackState.Playing) {
