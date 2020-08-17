@@ -253,7 +253,8 @@ namespace OriginalSoundTrack {
                 }
                 currentSong = new AudioFileReader(file);
                 currentSong.Volume = volume * globalMusicVolume;
-                fader = new FadeInOutSampleProvider(currentSong);
+                var looper = new LoopStream(currentSong, shouldLoop);
+                fader = new FadeInOutSampleProvider(new WaveToSampleProvider(looper));
                 outputDevice.Init(fader);
                 #if DEBUG
                     Debug.Log("====== Now Playing: " + file);
@@ -280,14 +281,10 @@ namespace OriginalSoundTrack {
 
         private void FixedUpdate() {
             if (currentSong != null) {
-                if (currentSong.Position >= currentSong.Length) {
-                    if (shouldLoop) {
-                        currentSong.Position = 0;
-                    } else {
-                        outputDevice.Stop();
-                        currentSong.Position = currentSong.Length - 1;
-                        PickOutMusic(startedTeleporterEvent);
-                    }
+                if (currentSong.Position >= currentSong.Length && !shouldLoop) {
+                    outputDevice.Stop();
+                    currentSong.Position = currentSong.Length - 1;
+                    PickOutMusic(startedTeleporterEvent);
                 }
             }
         }
@@ -306,5 +303,45 @@ namespace OriginalSoundTrack {
         public string[] scenes;
         public bool boss = false;
         public float volume = 1f;
+    }
+
+    public class LoopStream : WaveStream {
+
+        WaveStream sourceStream;
+        bool EnableLooping = true;
+
+        public LoopStream(WaveStream sourceStream, bool shouldLoop) {
+            this.sourceStream = sourceStream;
+            this.EnableLooping = shouldLoop;
+        }
+
+        public override WaveFormat WaveFormat {
+            get { return sourceStream.WaveFormat; }
+        }
+
+        public override long Position {
+            get { return sourceStream.Position; }
+            set { sourceStream.Position = value; }
+        }
+
+        public override long Length {
+            get { return sourceStream.Length; }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count) {
+            int read = 0;
+            while (read < count) {
+                int required = count - read;
+                int readThisTime = sourceStream.Read(buffer, offset + read, required);
+                if (readThisTime < required || sourceStream.Position >= sourceStream.Length) {
+                    if (!EnableLooping) {
+                        break;
+                    }
+                    sourceStream.Position = 0;
+                }
+                read += readThisTime;
+            }
+            return read;
+        }
     }
 }
