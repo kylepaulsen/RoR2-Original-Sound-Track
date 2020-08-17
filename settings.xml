@@ -22,7 +22,7 @@
 
         <song
             name="01 Risk of Rain.mp3"
-            scenes="title,lobby,logbook,bazaar"
+            scenes="title,lobby,logbook,crystalworld,eclipseworld"
             boss="false"
             volume="1"
         />
@@ -32,7 +32,7 @@
         "scenes" are the comma separated scene IDs (or levels) that will have a chance to play this music.
         See README.md for more info on scene IDs.
 
-        "boss" is if this music plays during a teleporter event or not.
+        "boss" is if this music plays during a teleporter event or not (or during the final boss).
         It's important to understand that when boss is true, the music ONLY plays during teleporter events
         and when boss is false, the music ONLY plays when *NOT* during a teleporter event.
 
@@ -48,7 +48,7 @@
     <music>
         <song
             name="01 Risk of Rain.mp3"
-            scenes="title,lobby,logbook,bazaar"
+            scenes="splash,intro,title,lobby,logbook,bazaar,crystalworld,eclipseworld"
             boss="false"
             volume="1"
         />
@@ -72,7 +72,13 @@
         />
         <song
             name="05 Cyclogenesis.mp3"
-            scenes="foggyswamp,arena"
+            scenes="foggyswamp,shipgraveyard,arena"
+            boss="false"
+            volume="1"
+        />
+        <song
+            name="06 25.3 N 91.7 E.mp3"
+            scenes="outro"
             boss="false"
             volume="1"
         />
@@ -102,7 +108,7 @@
         />
         <song
             name="10 Tropic of Cancer.mp3"
-            scenes="foggyswamp,goolake,wispgraveyard,frozenwall"
+            scenes="foggyswamp,goolake,wispgraveyard,frozenwall,skymeadow"
             boss="true"
             volume="1"
         />
@@ -114,13 +120,13 @@
         />
         <song
             name="12 Surface Tension.mp3"
-            scenes="blackbeach,golemplains,goolake,foggyswamp"
+            scenes="blackbeach,golemplains,goolake,foggyswamp,skymeadow"
             boss="true"
             volume="1"
         />
         <song
             name="13 Arctic Oscillation.mp3"
-            scenes="frozenwall"
+            scenes="frozenwall,skymeadow"
             boss="false"
             volume="1"
         />
@@ -132,7 +138,7 @@
         />
         <song
             name="14 Precipitation.mp3"
-            scenes="skymeadow"
+            scenes="moon"
             boss="true"
             volume="1"
         />
@@ -150,13 +156,13 @@
         />
         <song
             name="16 Coalescence.mp3"
-            scenes="skymeadow,arena"
+            scenes="moon"
             boss="false"
             volume="1"
         />
         <song
             name="17 Chanson d'Automne.mp3"
-            scenes="shipgraveyard,wispgraveyard,goolake,foggyswamp"
+            scenes="wispgraveyard,goolake,foggyswamp,skymeadow"
             boss="false"
             volume="1"
         />

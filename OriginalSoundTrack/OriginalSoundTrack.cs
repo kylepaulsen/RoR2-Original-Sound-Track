@@ -142,6 +142,17 @@ namespace OriginalSoundTrack {
                 }
             };
 
+            On.EntityStates.Missions.BrotherEncounter.Phase1.OnEnter += (orig, self) => {
+                orig(self);
+                Debug.Log("====================== FINAL BOSS FIGHT START ======================");
+                PickOutMusic(true);
+            };
+
+            On.EntityStates.Missions.BrotherEncounter.EncounterFinished.OnEnter += (orig, self) => {
+                orig(self);
+                Debug.Log("====================== FINAL BOSS FIGHT DONE ======================");
+            };
+
             SceneManager.sceneLoaded += (scene, mode) => {
                 #if DEBUG
                     Debug.Log("====================== CHANGE SCENE ========================");
@@ -258,7 +269,7 @@ namespace OriginalSoundTrack {
 
         public void Update() {
             if (oldMusicVolume == "" && RoR2.Console.instance != null) {
-                var convar = RoR2.Console.instance.FindConVar("volume_msx");
+                var convar = RoR2.Console.instance.FindConVar("volume_music");
                 // set in game music volume to 0 so we hear the new music only.
                 if (convar != null) {
                     oldMusicVolume = convar.GetString();
@@ -282,7 +293,7 @@ namespace OriginalSoundTrack {
         }
 
         private void OnDestroy() {
-            var convar = RoR2.Console.instance.FindConVar("volume_msx");
+            var convar = RoR2.Console.instance.FindConVar("volume_music");
             if (convar != null) {
                 convar.SetString(oldMusicVolume);
             }

@@ -31,13 +31,13 @@ Example for playing MyFile.mp3 on the title screen and main menus:
 ```
 <song
     name="MyFile.mp3"
-    scenes="title,lobby,logbook"
+    scenes="title,lobby,logbook,crystalworld,eclipseworld"
     boss="false"
     volume="1"
 />
 ```
 
-Setting boss to "true" means that music can only play when the player activates the teleport on a level.
+Setting boss to "true" means that music can only play when the player activates the teleport on a level (or on the final boss fight).
 Otherwise music can only play elsewhere (non teleport events).
 "volume" is a decimal between 0 and 1.
 
@@ -53,7 +53,7 @@ The default path it scans for music is: `Risk of Rain 2\BepInEx\plugins\Original
 
 ## Scene IDs (level IDs).
 
-(As of the hidden realms update)
+(As of the 1.0 update)
 
 See here for pictures of the level scenes:
 https://riskofrain2.fandom.com/wiki/Environments
@@ -63,9 +63,14 @@ Non Levels:
 
 ID                 Description
 ===============================================
+splash         -   "hopoo games" image
+intro          -   intro cutscene
+outro          -   outro cutscene
 title          -   the title screen
 lobby          -   the select character screen.
 logbook        -   view logs screen.
+crystalworld   -   prismatic trials menu (not normally reachable in modded RoR2)
+eclipseworld   -   eclipse menu
 
 Levels:
 
@@ -81,6 +86,7 @@ wispgraveyard  -   Scorched Acres
 dampcavesimple -   Abyssal Depths
 shipgraveyard  -   Siren's Call
 skymeadow      -   Sky Meadow
+moon           -   Commencement (Final Level)
 
 artifactworld  -   Bulwark's Ambry (Artifact Challenge arena where you unlock the artifacts with keys.)
 arena          -   Void Fields (poison area with lots of "teleport" events.)
