@@ -85,6 +85,7 @@ frozenwall     -   Rallypoint Delta
 wispgraveyard  -   Scorched Acres
 dampcavesimple -   Abyssal Depths
 shipgraveyard  -   Siren's Call
+rootjungle     -   Sundered Grove
 skymeadow      -   Sky Meadow
 moon           -   Commencement (Final Level)
 
