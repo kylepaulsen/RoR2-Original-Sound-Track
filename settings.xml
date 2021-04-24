@@ -6,6 +6,9 @@
     <!-- Should music loop? If not true, then another song is selected from scene matches -->
     <loop>true</loop>
 
+    <!-- Should include music in Risk of Rain 2 OST pool? If true, then normal soundtrack is played in place of absent music defiend here -->
+    <pool>true</pool>
+
     <!-- To have this plugin scan a different directory for music files,
         Uncomment <music-path> below (remove <!- - and - -> from the line below) -->
 

@@ -15,13 +15,14 @@ Music files can be in .mp3 or .wav format (with those exact extensions).
 Make sure the filenames match what's in settings.xml (or edit settings.xml to match your files.)
 
 If you delete settings.xml, don't match your filenames with `<song>` tags, or delete all `<song>` tags, then the
-plugin will just choose random music it found.
+plugin will just choose random music it found, or, if the property `<pool>` is set, the plugin will play the normal
+music from the game.
 
 ## settings.xml
 
 If your files match all the song "names", then you don't need to do anything else, but feel free to customize.
 
-If the plugin fails to match a song for a scene, it will just choose a random one it found in the plugin directory.
+If the plugin fails to match a song for a scene, it will just choose a random one it found in the plugin directory or music from the game.
 
 Put scene IDs in the "scenes" attribute to have audio play on that scene in settings.xml.
 The scenes attribute is comma separated. A scene only has to be "contained" in the real scene ID for it to match:
@@ -47,6 +48,8 @@ among the matching songs.
 The top level `<volume>` tag is the master volume for all this plugin's music. Again, a decimal between 0 and 1.
 
 The top level `<loop>` tag determines if music should loop or pick another song (from matching songs) after a song ends.
+
+The top level `<pool>` tag determines if music should be pooled from the game's own music if a song is not defined or cannot be found for that scene.
 
 The top level `<music-path>` tag specifies where the plugin should scan for music. It does not traverse down directories.
 The default path it scans for music is: `Risk of Rain 2\BepInEx\plugins\OriginalSoundTrack`
