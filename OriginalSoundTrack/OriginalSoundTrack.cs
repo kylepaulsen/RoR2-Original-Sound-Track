@@ -42,11 +42,12 @@ namespace OriginalSoundTrack {
         private FileInfo[] soundFiles; // array of files found in the plugin folder
         private List<Music> musics = new List<Music>(); // list of main music objects.
         private AudioFileReader currentSong;
-        private string currentSongFullName = ""; // helpful for not restarting a song when it's already playing.
+        private string currentSongFullName = null; // helpful for not restarting a song when it's already playing.
         private bool startedTeleporterEvent = false; // tracks the first interaction with the tele.
         private bool songPaused = false; // for pausing the music when the player pauses.
         private float globalMusicVolume = 0.5f; // default global music volume.
         private bool shouldLoop = true; // should songs loop when they end?
+        private bool shouldPool = false; // should include songs from normal soundtrack?
         private string oldMusicVolume = ""; // what the music convar was before we override it.
         private string currentScene = ""; // helpful for picking out boss music.
         private System.Random rnd = new System.Random(); // helpful for picking random music.
@@ -55,8 +56,10 @@ namespace OriginalSoundTrack {
         //The Awake() method is run at the very start when the game is initialized.
         public void Awake() {
             var pluginPath = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var musicPath = pluginPath;
+            var musicPath = pluginPath;            
 
+            //attempt to parse settingsXml. Upon sucessful parse, default settings are changed and new music
+            //is added to list musics. Upon failure, default settings kept and list musics is kept empty.
             try {
                 var settingsXml = new XmlDocument();
                 settingsXml.Load(pluginPath + "/settings.xml");
@@ -64,6 +67,7 @@ namespace OriginalSoundTrack {
 
                 globalMusicVolume = float.Parse(settings["volume"].InnerText, CultureInfo.InvariantCulture);
                 shouldLoop = settings["loop"].InnerText.ToLower() == "true";
+                shouldPool = settings["pool"].InnerText.ToLower() == "true";
 
                 if (settings["music-path"] != null) {
                     musicPath = settings["music-path"].InnerText;
@@ -167,7 +171,8 @@ namespace OriginalSoundTrack {
                     startedTeleporterEvent = false;
                     PickOutMusic();
                 }
-            };
+            };            
+
         }
 
         private FileInfo[] SearchForAudioFiles(string path) {
@@ -237,47 +242,71 @@ namespace OriginalSoundTrack {
                 Debug.Log("choosing random song...");
             #endif
             // if we are here, then we failed to pick a music, so pick one at random from all of them we found.
-            tries = 0;
-            while (randFile == currentSongFullName && tries < 10) {
-                randFile = soundFiles[rnd.Next(soundFiles.Length)].FullName;
-                tries++;
+            //if setting shouldPool is enabled, use the normal soundtrack from the game.
+            if(shouldPool){
+                //no new music is playing, so none is picked
+                randFile = null;
+            }else{
+                tries = 0;
+                while (randFile == currentSongFullName && tries < 10) {
+                    randFile = soundFiles[rnd.Next(soundFiles.Length)].FullName;
+                    tries++;
+                }                
             }
-            StartCoroutine(PlayMusic(randFile));
+            StartCoroutine(PlayMusic(randFile));            
         }
 
-        private IEnumerator<WaitForSeconds> PlayMusic(string file, float volume = 1f) {
-            if (file != currentSongFullName) {
-                currentSongFullName = file;
-                if (outputDevice.PlaybackState == PlaybackState.Playing) {
-                    fader.BeginFadeOut(1500);
-                    yield return new WaitForSeconds(1.5f);
-                    outputDevice.Stop();
-                    currentSong = null;
+        private IEnumerator<WaitForSeconds> PlayMusic(string file, float volume = 1f) {            
+            if (outputDevice.PlaybackState == PlaybackState.Playing) {
+                fader.BeginFadeOut(1500);
+                yield return new WaitForSeconds(1.5f);
+                outputDevice.Stop();
+                currentSong = null;
+            }
+            if(file == null){
+                //no new music was selected, so return to OST pool
+                //If already playing OST music from previous scene, 
+                //then no need to unmute normal music again
+                if(currentSongFullName!=null){
+                    currentSongFullName = null;
+                    unmuteNormalMusic();
+                }                
+                #if DEBUG
+                    Debug.Log("PlayMusic: Playing music from OST");
+                #endif
+            }else{
+                if (file != currentSongFullName) {
+                    //new music provided, play that music.
+                    //if we were already playing new music, 
+                    //then don't mute normal volume again
+                    if(currentSongFullName == null){
+                        muteNormalMusic();
+                    }
+                    currentSongFullName = file;
+                    currentSong = new AudioFileReader(file);
+                    currentSong.Volume = volume * globalMusicVolume;
+                    var looper = new LoopStream(currentSong, shouldLoop);
+                    fader = new FadeInOutSampleProvider(new WaveToSampleProvider(looper));
+                    outputDevice.Init(fader);
+                    #if DEBUG
+                        Debug.Log("====== Now Playing: " + file);
+                    #endif
+                    outputDevice.Play();
+                    songPaused = false;
+                } else {
+                    #if DEBUG
+                        Debug.Log("PlayMusic: Already playing: " + file);
+                    #endif
                 }
-                currentSong = new AudioFileReader(file);
-                currentSong.Volume = volume * globalMusicVolume;
-                var looper = new LoopStream(currentSong, shouldLoop);
-                fader = new FadeInOutSampleProvider(new WaveToSampleProvider(looper));
-                outputDevice.Init(fader);
-                #if DEBUG
-                    Debug.Log("====== Now Playing: " + file);
-                #endif
-                outputDevice.Play();
-                songPaused = false;
-            } else {
-                #if DEBUG
-                    Debug.Log("PlayMusic: Already playing: " + file);
-                #endif
             }
         }
 
-        public void Update() {
+        public void Update() {     
+            //obtain user-set music volume convar
             if (oldMusicVolume == "" && RoR2.Console.instance != null) {
                 var convar = RoR2.Console.instance.FindConVar("volume_music");
-                // set in game music volume to 0 so we hear the new music only.
                 if (convar != null) {
                     oldMusicVolume = convar.GetString();
-                    convar.SetString("0");
                 }
             }
         }
@@ -292,10 +321,32 @@ namespace OriginalSoundTrack {
             }
         }
 
+        //If the normal music is playing, then do not override this value on game exit
         private void OnDestroy() {
             var convar = RoR2.Console.instance.FindConVar("volume_music");
-            if (convar != null) {
+            if (convar != null && currentSongFullName != null) {
                 convar.SetString(oldMusicVolume);
+            }
+        }
+
+        private void muteNormalMusic(){
+            if (RoR2.Console.instance != null) {
+                var convar = RoR2.Console.instance.FindConVar("volume_music");
+                // set in game music volume to 0 so we hear the new music only.
+                if (convar != null) {
+                    oldMusicVolume = convar.GetString();
+                    convar.SetString("0");
+                }
+            }
+        }
+
+        private void unmuteNormalMusic(){
+            if (RoR2.Console.instance != null) {
+                var convar = RoR2.Console.instance.FindConVar("volume_music");
+                // reset in game music volume so we hear the normal music.
+                if (convar != null && !oldMusicVolume.Equals(String.Empty)) {
+                    convar.SetString(oldMusicVolume);
+                }
             }
         }
     }
