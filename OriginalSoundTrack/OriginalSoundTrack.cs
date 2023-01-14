@@ -14,7 +14,6 @@ using System.Linq;
 using System.Xml;
 using System.Reflection;
 using System.Globalization;
-using static UnityEngine.ParticleSystem;
 using BepInEx.Configuration;
 
 namespace OriginalSoundTrack {
@@ -133,7 +132,7 @@ namespace OriginalSoundTrack {
 
 			On.RoR2.UI.PauseScreenController.OnEnable += (orig, self) => {
 				orig(self);
-				if (outputDevice != null && outputDevice.PlaybackState == NAudio.Wave.PlaybackState.Playing) {
+				if (outputDevice != null && outputDevice.PlaybackState == PlaybackState.Playing) {
 					outputDevice.Pause();
 					songPaused = true;
 				}
@@ -277,7 +276,7 @@ namespace OriginalSoundTrack {
 		private IEnumerator<WaitForSeconds> PlayMusic(string file, float volume = 1f) {
 			if (file != currentSongFullName) {
 				currentSongFullName = file;
-				if (outputDevice.PlaybackState == NAudio.Wave.PlaybackState.Playing) {
+				if (outputDevice.PlaybackState == PlaybackState.Playing) {
 					fader.BeginFadeOut(1500);
 					yield return new WaitForSeconds(1.5f);
 					outputDevice.Stop();
